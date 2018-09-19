@@ -10,8 +10,11 @@
   "author": "pratik",
   "license": "ISC",
   "dependencies": {
+    "async": "^2.6.1",
+    "bluebird": "^3.5.2",
     "body-parser": "^1.18.3",
     "express": "^4.16.3",
-    "mongodb": "^3.1.4"
+    "mongodb": "^3.1.4",
+    "nodemailer": "^4.6.8"
   }
 }

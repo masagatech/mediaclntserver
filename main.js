@@ -21,6 +21,7 @@ const routes = require('./routes/index')
 
 initDatabases().then(dbs => {
     dbu.db = dbs;
+    dbu.createIndexes();
     // Initialize the application once database connections are ready.
     routes(app).listen(3000, () => console.log('Listening on port 3000'))
 }).catch(err => {
