@@ -6,20 +6,43 @@ const async = require("async");
 
 module.exports = login = {};
 
-login.getLogin = function (req, res) {
-    dbs.getOne(dbs.colnm.user, req.body).then((docs) => {
-        res.json(docs);
+login.getLogin = function(req, res) {
+    const params = req.body;
+
+    if (!params.email || params.email.trim() === '') {
+        res.json(requtils.res(false, null, "91", "Email is required"));
+        return;
+    } else if (!params.pwd || params.pwd.trim() === '') {
+        res.json(requtils.res(false, null, "92", "Password is required"));
+        return;
+    }
+
+    dbs.getOne(dbs.colnm.user, { 'email': params.email }).then((docs) => {
+        var data = [];
+
+        if (docs === null) {
+            res.json(requtils.res(false, null, "93", "Invalid Login"));
+            return;
+        }
+
+        if (params.pwd.trim() !== docs.pwd) {
+            res.json(requtils.res(false, null, "94", "Invalid Login"));
+            return;
+        }
+
+        data = {
+            "status": true,
+            "data": docs
+        }
+
+        res.json(data);
     }).catch((err) => {
         res.error(err);
     })
 }
 
-
-login.createUser = function (req, res) {
-    // required parameters
+login.createUser = function(req, res) {
     const params = req.body;
-
-   
 
     if (!params.email || params.email.trim() === '') {
         res.json(requtils.res(false, null, "91", "Email is required"));
@@ -32,22 +55,22 @@ login.createUser = function (req, res) {
         return;
     }
 
-
     async.waterfall([
-        function (callback) {
+        function(callback) {
             // check user is exists or not
+
             dbs.getOne(dbs.colnm.user, {
-                "email": req.body.email
+                "email": params.email
             }).then((docs) => {
                 callback(null, requtils.res(true, docs, "", null));
             }).catch((err) => {
                 callback(null, requtils.res(false, null, "01", err));
             })
         },
-        function (args, callback) {
+        function(args, callback) {
             if (args.status) {
                 if (args.data === null) {
-                    dbs.col(dbs.colnm.user).insertOne(req.body, function (err, res) {
+                    dbs.col(dbs.colnm.user).insertOne(params, function(err, res) {
                         if (err) {
                             callback(null, requtils.res(false, null, "02", "Error while creating user, Try later"));
                             return
@@ -55,10 +78,10 @@ login.createUser = function (req, res) {
                         callback(null, requtils.res(true, null, "05", "User created successfully!!!"));
 
                         common.sendMail({
-                            from : '"Media Client"',
-                            to : 'pratikway.90@gmail.com',
+                            from: '"Media Client"',
+                            to: 'pratikway.90@gmail.com',
                             subject: 'User Registration',
-                            html : `
+                            html: `
                                 <center><b>***ACTION REQUIRED***</b></center>
                                 <p>To activate your account (and prove you’re not a spam bot), please click this link:</p>
                                 <p><a href="">https://greensock.com/forums/index.php?app=core&module=global&section=register&do=auto_validate&uid=49614&aid=b0020fb425fefbe98029cc30f62d755f</a></p>
@@ -71,8 +94,6 @@ login.createUser = function (req, res) {
                             `
                         });
 
-
-
                         console.log("Number of documents inserted: " + res.insertedCount);
                     });
                 } else {
@@ -82,7 +103,7 @@ login.createUser = function (req, res) {
                 callback(null, args);
             }
         },
-    ], function (err, result) {
+    ], function(err, result) {
         if (err) {
             res.json(err)
             return

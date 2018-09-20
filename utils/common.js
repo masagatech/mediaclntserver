@@ -11,12 +11,9 @@ let transporter = nodemailer.createTransport({
     }
 });
 
-
 const common = {};
 
-
 common.sendMail = function(template) {
-
     let mailOptions = {
         from: template.from, // sender address
         to: template.emails, // list of receivers
@@ -30,14 +27,12 @@ common.sendMail = function(template) {
         }
         console.log('Message sent: %s', info.messageId);
         // Preview only available when sending through an Ethereal account
+
         console.log('Preview URL: %s', nodemailer.getTestMessageUrl(info));
 
         // Message sent: <b658f8ca-6296-ccf4-8306-87d57a0b4321@example.com>
         // Preview URL: https://ethereal.email/message/WaQKMgKddxQDoou...
     });
-    
 }
-
-
 
 module.exports = common;
