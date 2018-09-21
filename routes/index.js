@@ -9,7 +9,8 @@ module.exports = function(app) {
 
     // Workspace
 
-    app.post('/saveWorkspace', wrkspc.saveWorkspace);
+    app.post('/getWorkspaceDetails', wrkspc.getWorkspaceDetails);
+    app.post('/saveWorkspaceInfo', wrkspc.saveWorkspaceInfo);
 
     return app
 }

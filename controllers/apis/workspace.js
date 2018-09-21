@@ -1,12 +1,13 @@
 const dbs = require('../../db/dbutils');
 const requtils = require('../../utils/requtil');
-const common = require('../../utils/common')
+const common = require('../../utils/common');
+
 
 const async = require("async");
 
 module.exports = wrkspc = {};
 
-wrkspc.getWorkspace = function(req, res) {
+wrkspc.getWorkspaceDetails = function(req, res) {
     const params = req.body;
 
     dbs.getOne(dbs.colnm.workspace, params).then((docs) => {
@@ -16,7 +17,9 @@ wrkspc.getWorkspace = function(req, res) {
     })
 }
 
-wrkspc.isValidWorkspace = function(params) {
+wrkspc.isValidWorkspace = function(req, res) {
+    const params = req.body;
+
     if (!params.wscode || params.wscode.trim() === '') {
         res.json(requtils.res(false, null, "101", "Workspace Code is required"));
         return false;
@@ -38,53 +41,42 @@ wrkspc.isValidWorkspace = function(params) {
         return false;
     }
 
-    // async.waterfall([
-    //     function(args, callback) {
-    //         // check workspace code is exists or not
-
-    //         dbs.getOne(dbs.colnm.workspace, {
-    //             "wscode": params.wscode
-    //         }).then((docs) => {
-    //             callback(null, requtils.res(true, docs, "", null));
-    //         }).catch((err) => {
-    //             callback(null, requtils.res(false, null, "-1", err));
-    //         })
-
-    //         if (args.data === null) {
-    //             res.json(requtils.res(false, null, "106", "Workspace Code is Already Exists"));
-    //             return false;
-    //         }
-    //     }
-    // ]);
-
     return true;
 }
 
-// Save Workspace
+// Insert Workspace
 
-wrkspc.saveWorkspace = function(req, res) {
+function insertWorkspace(req, res) {
     const params = req.body;
 
-    var isvalid = wrkspc.isValidWorkspace(params);
+    async.waterfall([
+        function(callback) {
+            // check workspace code is exists or not
 
-    if (isvalid) {
-        async.waterfall([
-            function(callback) {
-                // check wprkspace code is exists or not
+            dbs.getOne(dbs.colnm.workspace, {
+                "wscode": params.wscode
+            }).then((docs) => {
+                callback(null, requtils.res(true, docs, "", null));
+            }).catch((err) => {
+                callback(null, requtils.res(false, null, "-1", err));
+            })
+        },
 
-                dbs.getOne(dbs.colnm.workspace, {
-                    "_id": params._id
-                }).then((docs) => {
-                    callback(null, requtils.res(true, docs, "", null));
-                }).catch((err) => {
-                    callback(null, requtils.res(false, null, "-1", err));
-                })
-            },
-
-            function(args, callback) {
-                if (args.status) {
-                    if (args.data === null) {
-                        dbs.col(dbs.colnm.workspace).insertOne(params, function(err, res) {
+        function(args, callback) {
+            if (args.status) {
+                if (args.data === null) {
+                    dbs.nextid(dbs.colnm.workspace, function(err, sequence) {
+                        dbs.col(dbs.colnm.workspace).insertOne({
+                            "wsid": sequence,
+                            "wscode": params.wscode,
+                            "lgcode": params.lgcode,
+                            "lgpwd": params.lgpwd,
+                            "wsname": params.wsname,
+                            "mobile": params.mobile,
+                            "address": params.address,
+                            "createdby": params.cuid,
+                            "createdon": new Date()
+                        }, function(err, res) {
                             if (err) {
                                 callback(null, requtils.res(false, null, "-1", "Error while creating workspace, Try later"));
                                 return
@@ -92,30 +84,103 @@ wrkspc.saveWorkspace = function(req, res) {
 
                             callback(null, requtils.res(true, null, "1", "Workspace Saved successfully!!!"));
                         });
-                    } else {
-                        var ObjectID = require('mongodb').ObjectID;
-                        var myquery = { "_id": ObjectID(params._id) };
-                        var newvalues = { $set: params };
-
-                        dbs.col(dbs.colnm.workspace).updateOne(myquery, newvalues, function(err, res) {
-                            if (err) {
-                                callback(null, requtils.res(false, null, "-1", "Error while creating workspace, Try later"));
-                                return
-                            };
-
-                            callback(null, requtils.res(true, null, "1", "Workspace Updated successfully!!!"));
-                        });
-                    }
+                    });
                 } else {
-                    callback(null, args);
+                    callback(null, requtils.res(false, null, "106", "Workspace Code is Already Exists"));
                 }
-            },
-        ], function(err, result) {
-            if (err) {
-                res.json(err)
-                return
+            } else {
+                callback(null, args);
             }
-            res.json(result);
-        })
+        },
+    ], function(err, result) {
+        if (err) {
+            res.json(err)
+            return
+        }
+        res.json(result);
+    })
+}
+
+// Update Workspace
+
+function updateWorkspace(req, res) {
+    const params = req.body;
+
+    async.waterfall([
+        function(callback) {
+            // check workspace code is exists or not
+
+            dbs.getOne(dbs.colnm.workspace, {
+                "wsid": '!' + params.wsid,
+                "wscode": params.wscode
+            }).then((docs) => {
+                callback(null, requtils.res(true, docs, "", null));
+            }).catch((err) => {
+                callback(null, requtils.res(false, null, "-1", err));
+            })
+        },
+
+        function(args, callback) {
+            // check workspace code is exists or not
+
+            if (args.status) {
+                // if (args.data === null) {
+
+                var myquery = {
+                    "wsid": params.wsid
+                }
+
+                var newvalues = {
+                    $set: {
+                        "lgcode": params.lgcode,
+                        "lgpwd": params.lgpwd,
+                        "wsname": params.wsname,
+                        "mobile": params.mobile,
+                        "address": params.address,
+                        "updatedby": params.cuid,
+                        "updatedon": new Date()
+                    }
+                };
+
+                dbs.col(dbs.colnm.workspace).updateOne(myquery, newvalues, function(err, res) {
+                    if (err) {
+                        callback(null, requtils.res(false, null, "-1", "Error while creating workspace, Try later. " + err));
+                        return
+                    };
+
+                    callback(null, requtils.res(true, null, "1", "Workspace Updated successfully!!!"));
+                });
+
+                // } else {
+                //     res.json(requtils.res(false, null, "106", "Workspace Code is Already Exists"));
+                // }
+            } else {
+                callback(null, args);
+            }
+        },
+    ], function(err, result) {
+        if (err) {
+            res.json(err)
+            return
+        }
+        res.json(result);
+    })
+}
+
+// Save Workspace
+
+wrkspc.saveWorkspaceInfo = function(req, res) {
+    const params = req.body;
+
+    var isvalid = wrkspc.isValidWorkspace(req, res);
+
+    if (isvalid) {
+        if (params._id == null || params._id == 0) {
+            console.log("insert");
+            insertWorkspace(req, res);
+        } else {
+            console.log("update");
+            updateWorkspace(req, res);
+        }
     }
 }
