@@ -65,26 +65,26 @@ function insertWorkspace(req, res) {
         function(args, callback) {
             if (args.status) {
                 if (args.data === null) {
-                    dbs.nextid(dbs.colnm.workspace, function(err, sequence) {
-                        dbs.col(dbs.colnm.workspace).insertOne({
-                            "wsid": sequence,
-                            "wscode": params.wscode,
-                            "lgcode": params.lgcode,
-                            "lgpwd": params.lgpwd,
-                            "wsname": params.wsname,
-                            "mobile": params.mobile,
-                            "address": params.address,
-                            "createdby": params.cuid,
-                            "createdon": new Date()
-                        }, function(err, res) {
-                            if (err) {
-                                callback(null, requtils.res(false, null, "-1", "Error while creating workspace, Try later"));
-                                return
-                            };
+                    // dbs.nextid(dbs.colnm.workspace, function(err, sequence) {
+                    dbs.col(dbs.colnm.workspace).insertOne({
+                        "wsid": sequence,
+                        "wscode": params.wscode,
+                        "lgcode": params.lgcode,
+                        "lgpwd": params.lgpwd,
+                        "wsname": params.wsname,
+                        "mobile": params.mobile,
+                        "address": params.address,
+                        "createdby": params.cuid,
+                        "createdon": new Date()
+                    }, function(err, res) {
+                        if (err) {
+                            callback(null, requtils.res(false, null, "-1", "Error while creating workspace, Try later"));
+                            return
+                        };
 
-                            callback(null, requtils.res(true, null, "1", "Workspace Saved successfully!!!"));
-                        });
+                        callback(null, requtils.res(true, null, "1", "Workspace Saved successfully!!!"));
                     });
+                    // });
                 } else {
                     callback(null, requtils.res(false, null, "106", "Workspace Code is Already Exists"));
                 }

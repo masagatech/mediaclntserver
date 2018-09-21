@@ -11,15 +11,12 @@ dbutils.col = function(collection) {
     return dbutils.db.production.collection(collection)
 }
 
-dbutils.nextid = function(collection, callback) {
-    dbutils.col('sequence').updateOne({ _id: collection }, { $inc: { seq: 1 } }, { upsert: true, new: true }, function(err, result) {
-        if (err) callback(err, result);
-        callback(err, result.value.seq);
-    });
-}
-
-
-
+// dbutils.nextid = function(collection, callback) {
+//     dbutils.col('sequence').updateOne({ _id: collection }, { $inc: { seq: 1 } }, { upsert: true, new: true }, function(err, result) {
+//         if (err) callback(err, result);
+//         callback(err, result.value.seq);
+//     });
+// }
 
 dbutils.OBJID = function(id) {
     return new mongoobj(id);
