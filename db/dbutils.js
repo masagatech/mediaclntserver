@@ -1,15 +1,35 @@
 const Promise = require("bluebird");
+const mongoobj = require('mongodb').ObjectID;
+var mongoSequence = require('mongo-sequence');
 
 const dbutils = {};
 
 dbutils.db = null;
 
-dbutils.col = function (collection) {
+
+dbutils.col = function(collection) {
     return dbutils.db.production.collection(collection)
 }
 
+dbutils.nextid = function(collection, callback) {
+    dbutils.col('sequence').findOneAndUpdate({ _id: collection }, { $inc: { seq: 1 } }, { upsert: true, returnNewDocument: true },
+        function(err, result) {
+            if (err) callback(err, result);
+            callback(err, result.value.seq);
+        });
+}
+
+dbutils.OBJID = function(id) {
+    return new mongoobj(id);
+}
+
 dbutils.colnm = {
-    user: 'user'
+    user: 'user',
+    workspace: 'wrkspc',
+    entity: 'entt',
+    zone: 'zone',
+    mom: 'mom',
+    client: 'client'
 }
 
 dbutils.getOne = (colname, filter) => {
@@ -30,14 +50,14 @@ dbutils.getOne = (colname, filter) => {
     });
 };
 
-dbutils.createIndexes = function () {
+dbutils.createIndexes = function() {
     // create index on user collection
     dbutils.col(dbutils.colnm.user).createIndex({
         email: 1
     }, {
         unique: true
-    }, function (err, result) {
-        if(err){
+    }, function(err, result) {
+        if (err) {
             console.log(err);
             return;
         }
