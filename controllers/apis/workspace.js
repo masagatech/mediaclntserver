@@ -45,7 +45,6 @@ wrkspc.isValidWorkspace = function(req, res) {
 }
 
 // Insert Workspace
-
 function insertWorkspace(req, res) {
     const params = req.body;
 
@@ -102,7 +101,6 @@ function insertWorkspace(req, res) {
 }
 
 // Update Workspace
-
 function updateWorkspace(req, res) {
     const params = req.body;
 
@@ -167,9 +165,27 @@ function updateWorkspace(req, res) {
     })
 }
 
-// Save Workspace
-
+//////////////////////////////////////////////////////////////////////////////////////////////////
 wrkspc.saveWorkspaceInfo = function(req, res) {
+    const params = req.body;
+
+
+    dbs.nextid(dbs.colnm.workspace, function(err, sequence) {
+
+        res.json(requtils.res(false, null, "105", "Mobile No is required" + sequence));
+
+    });
+
+
+
+
+
+}
+
+
+
+// Save Workspace
+wrkspc.saveWorkspaceInfo1 = function(req, res) {
     const params = req.body;
 
     var isvalid = wrkspc.isValidWorkspace(req, res);
