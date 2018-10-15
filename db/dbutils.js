@@ -7,19 +7,44 @@ const dbutils = {};
 dbutils.db = null;
 
 
-dbutils.col = function(collection) {
+dbutils.col = function (collection) {
     return dbutils.db.production.collection(collection)
 }
 
-dbutils.nextid = function(collection, callback) {
-    dbutils.col('sequence').findOneAndUpdate({ _id: collection }, { $inc: { seq: 1 } }, { upsert: true, returnNewDocument: true },
-        function(err, result) {
-            if (err) callback(err, result);
-            callback(err, result.value.seq);
-        });
+dbutils.nextid = function (collection, callback) {
+
+    return new Promise((resolve, reject) => {
+        dbutils.col('sequence').findOneAndUpdate({
+                _id: collection
+            }, {
+                $inc: {
+                    seq: 1
+                }
+            }, {
+                upsert: true,
+                returnOriginal: false
+            },
+            function (err, result) {
+                if (err) reject(err);
+                resolve(result.value.seq);
+            });
+    });
 }
 
-dbutils.OBJID = function(id) {
+dbutils.exists = function (collection, query) {
+
+    return new Promise((resolve, reject) => {
+        dbutils.col(collection).findOne(query,
+            function (err, result) {
+
+                if (err) reject(err);
+                console.log(result)
+                resolve((result !== null ? result._id : 0));
+            });
+    });
+}
+
+dbutils.OBJID = function (id) {
     return new mongoobj(id);
 }
 
@@ -33,8 +58,19 @@ dbutils.colnm = {
 }
 
 dbutils.getOne = (colname, filter) => {
+
+    return preGetOne(colname, filter);
+};
+
+
+dbutils.getOneProj = (colname, filter, projection) => {
+
+    return preGetOne(colname, filter, projection);
+};
+
+function preGetOne(colname, filter, projection) {
     return new Promise((resolve, reject) => {
-        dbutils.col(colname).findOne(filter, ((err, docs) => {
+        dbutils.col(colname).findOne(filter, projection, ((err, docs) => {
             if (err) {
                 console.log(err)
                 reject(err)
@@ -48,21 +84,33 @@ dbutils.getOne = (colname, filter) => {
             }
         }))
     });
-};
+}
 
-dbutils.createIndexes = function() {
+dbutils.createIndexes = function () {
     // create index on user collection
     dbutils.col(dbutils.colnm.user).createIndex({
         email: 1
     }, {
         unique: true
-    }, function(err, result) {
+    }, function (err, result) {
         if (err) {
-            console.log(err);
+            //   console.log(err);
             return;
         }
-        console.log(result);
-    })
+        // console.log(result);
+    });
+
+    dbutils.col(dbutils.colnm.client).createIndex({
+        clientid: 1
+    }, {
+        unique: true
+    }, function (err, result) {
+        if (err) {
+            //   console.log(err);
+            return;
+        }
+        // console.log(result);
+    });
 }
 
 

@@ -6,7 +6,7 @@ const async = require("async");
 
 module.exports = login = {};
 
-login.getLogin = function(req, res) {
+login.getLogin = function (req, res) {
     const params = req.body;
 
     if (!params.email || params.email.trim() === '') {
@@ -17,7 +17,14 @@ login.getLogin = function(req, res) {
         return;
     }
 
-    dbs.getOne(dbs.colnm.user, { 'email': params.email }).then((docs) => {
+    dbs.getOneProj(dbs.colnm.user, {
+        'email': params.email
+    }, {
+        projection: {
+            email: 1,
+            pwd: 1
+        }
+    }).then((docs) => {
         var data = {};
 
         if (docs === null) {
@@ -41,7 +48,7 @@ login.getLogin = function(req, res) {
     })
 }
 
-login.registeredUser = function(req, res) {
+login.registeredUser = function (req, res) {
     const params = req.body;
 
     if (!params.name || params.name.trim() === '') {
@@ -62,7 +69,7 @@ login.registeredUser = function(req, res) {
     }
 
     async.waterfall([
-        function(callback) {
+        function (callback) {
             // check user is exists or not
 
             dbs.getOne(dbs.colnm.user, {
@@ -74,10 +81,10 @@ login.registeredUser = function(req, res) {
             })
         },
 
-        function(args, callback) {
+        function (args, callback) {
             if (args.status) {
                 if (args.data === null) {
-                    dbs.col(dbs.colnm.user).insertOne(params, function(err, res) {
+                    dbs.col(dbs.colnm.user).insertOne(params, function (err, res) {
                         if (err) {
                             callback(null, requtils.res(false, null, "-1", "Error while creating user, Try later"));
                             return
@@ -109,7 +116,7 @@ login.registeredUser = function(req, res) {
                 callback(null, args);
             }
         },
-    ], function(err, result) {
+    ], function (err, result) {
         if (err) {
             res.json(err)
             return
