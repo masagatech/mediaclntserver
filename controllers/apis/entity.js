@@ -3,9 +3,13 @@ const requtils = require('../../utils/requtil');
 
 module.exports = entt = {};
 
+// Insert / Update
+
 entt.saveEntity = function(req, res) {
+    const params = req.body;
+
     dbs.exists(dbs.colnm.entity, {
-        _id: req.body._id
+        _id: params._id
     }).then((id) => {
         if (id > 0) {
             return Promise.resolve(id);
@@ -13,28 +17,33 @@ entt.saveEntity = function(req, res) {
             return dbs.nextid(dbs.colnm.entity)
         }
     }).then((finalid) => {
-        req.body._id = finalid;
+        params._id = finalid;
+
+        if (params.isedit == true) {
+            params.updatedby = "admin";
+            params.updatedon = dbs.getCurrentDate();
+        } else {
+            params.createdby = "admin";
+            params.createdon = dbs.getCurrentDate();
+        }
 
         dbs.col(dbs.colnm.entity).findOneAndUpdate({
             _id: finalid
         }, {
-            $set: req.body
+            $set: params
         }, {
             upsert: true,
             returnOriginal: false
         }, function(err, result) {
             if (err) {
-                console.log(err);
                 requtils.res(false, null, '-1', err);
                 return;
             };
 
-            console.log(result);
-
-            if (finalid == 0) {
-                res.json(requtils.res(true, result, '1', 'Data saved successfully'));
-            } else {
+            if (params.isedit == true) {
                 res.json(requtils.res(true, result, '2', 'Data updated successfully'));
+            } else {
+                res.json(requtils.res(true, result, '1', 'Data saved successfully'));
             }
         });
     }).catch((err) => {
