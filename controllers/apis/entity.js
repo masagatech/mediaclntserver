@@ -3,7 +3,7 @@ const requtils = require('../../utils/requtil');
 
 module.exports = entt = {};
 
-entt.saveEntity = function (req, res) {
+entt.saveEntity = function(req, res) {
     dbs.exists(dbs.colnm.entity, {
         _id: req.body._id
     }).then((id) => {
@@ -14,28 +14,34 @@ entt.saveEntity = function (req, res) {
         }
     }).then((finalid) => {
         req.body._id = finalid;
+
         dbs.col(dbs.colnm.entity).findOneAndUpdate({
-                _id: finalid
-            }, {
-                $set: req.body
-            }, {
-                upsert: true,
-                returnOriginal: false
-            },
-            function (err, result) {
-                if (err) {
-                    console.log(err);
-                    requtils.res(false, null, '0013', err);
-                    return;
-                };
-                console.log(result);
-                res.json(requtils.res(true, 'Data saved successfully', '', null));
-            });
+            _id: finalid
+        }, {
+            $set: req.body
+        }, {
+            upsert: true,
+            returnOriginal: false
+        }, function(err, result) {
+            if (err) {
+                console.log(err);
+                requtils.res(false, null, '-1', err);
+                return;
+            };
+
+            console.log(result);
+
+            if (finalid == 0) {
+                res.json(requtils.res(true, result, '1', 'Data saved successfully'));
+            } else {
+                res.json(requtils.res(true, result, '2', 'Data updated successfully'));
+            }
+        });
     }).catch((err) => {
-        res.json(requtils.res(false, null, '0013', err));
+        res.json(requtils.res(false, null, '-1', err));
     })
 }
 
-entt.getEntity = function (req, res) {
+entt.getEntity = function(req, res) {
 
 }

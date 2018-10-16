@@ -1,52 +1,96 @@
 const dbs = require('../../db/dbutils');
 const requtils = require('../../utils/requtil');
-const common = require('../../utils/common');
-
-
-const async = require("async");
 
 module.exports = wrkspc = {};
 
-// insert update workspace
+// Validate
 
+function isValidWorkspace(req, res) {
+    const params = req.body;
 
-wrkspc.saveWrksSpace = function (req, res) {
-    dbs.exists(dbs.colnm.workspace, {
-        _id: req.body._id
-    }).then((id) => {
-        if (id > 0) {
-            return Promise.resolve(id);
-        } else {
-            return dbs.nextid(dbs.colnm.workspace)
-        }
-    }).then((finalid) => {
-        req.body._id = finalid;
-        dbs.col(dbs.colnm.workspace).findOneAndUpdate({
+    if (!params.ws_code === '' || params.ws_code.trim() === '') {
+        res.json(requtils.res(false, null, "-1", "Workspace Code is Required"));
+        return false;
+    } else if (!params.ws_name === '' || params.ws_name.trim() === '') {
+        res.json(requtils.res(false, null, "-1", "Workspace Name is Required"));
+        return false;
+    } else if (!params.login_code === '' || params.login_code.trim() === '') {
+        res.json(requtils.res(false, null, "-1", "Login Code is Required"));
+        return false;
+    } else if (!params.pwd === '' || params.pwd.trim() === '') {
+        res.json(requtils.res(false, null, "-1", "Password is Required"));
+        return false;
+    } else if (!params.contact_person === '' || params.contact_person.trim() === '') {
+        res.json(requtils.res(false, null, "-1", "Contact Person is Required"));
+        return false;
+    } else if (!params.mobile === '' || params.mobile.trim() === '') {
+        res.json(requtils.res(false, null, "-1", "Mobile is Required"));
+        return false;
+    } else if (!params.address === '' || params.address.trim() === '') {
+        res.json(requtils.res(false, null, "-1", "Address is Required"));
+        return false;
+    }
+
+    return true;
+}
+
+// Insert / Update
+
+wrkspc.saveWorkspace = function(req, res) {
+    const isvalid = isValidWorkspace(req, res);
+
+    if (isvalid) {
+        const params = req.body;
+
+        dbs.exists(dbs.colnm.workspace, {
+            _id: params._id
+        }).then((id) => {
+            if (id > 0) {
+                return Promise.resolve(id);
+            } else {
+                return dbs.nextid(dbs.colnm.workspace)
+            }
+        }).then((finalid) => {
+            params._id = finalid;
+
+            if (params.isedit == true) {
+                params.updatedby = "admin";
+                params.updatedon = dbs.getCurrentDate();
+            } else {
+                params.createdby = "admin";
+                params.createdon = dbs.getCurrentDate();
+            }
+
+            dbs.col(dbs.colnm.workspace).findOneAndUpdate({
                 _id: finalid
             }, {
-                $set: req.body
+                $set: params
             }, {
                 upsert: true,
                 returnOriginal: false
-            },
-            function (err, result) {
+            }, function(err, result) {
                 if (err) {
-                    console.log(err);
-                    requtils.res(false, null, '0013', err);
+                    requtils.res(false, null, '-1', err);
                     return;
                 };
-                console.log(result);
-                res.json(requtils.res(true, 'Data saved successfully', '', null));
+
+                if (params.isedit == true) {
+                    res.json(requtils.res(true, result, '2', 'Data updated successfully'));
+                } else {
+                    res.json(requtils.res(true, result, '1', 'Data saved successfully'));
+                }
             });
-    }).catch((err) => {
-        res.json(requtils.res(false, null, '0013', err));
-    })
+        }).catch((err) => {
+            res.json(requtils.res(false, null, '-1', err));
+        })
+    }
 }
 
-wrkspc.exists = function (req, res) {
+// Exists
 
+wrkspc.existsWorkspace = function(req, res) {
     dbs.exists(dbs.colnm.workspace, {
-        ws_code :new RegExp("^" + req.query.ws_code.toLowerCase(), "i") 
+        ws_code: new RegExp("^" + req.query.ws_code.toLowerCase(), "i")
     }).then((id) => {
         if (id > 0) {
             res.json({
@@ -60,20 +104,36 @@ wrkspc.exists = function (req, res) {
     })
 };
 
-wrkspc.getWrksSpace = function (req, res) {
+// Get All Data
 
+wrkspc.getAllWorkspace = function(req, res) {
     dbs.col(dbs.colnm.workspace).find({}, {
         projection: {
-            pwd: 0,
-            email: 0,
-            address: 0,
-            mobile: 0
+            _id: 1,
+            ws_code: 1,
+            ws_name: 1,
+            contact_person: 1,
+            mobile: 1,
+            email: 1
         }
     }).toArray(function name(err, result) {
         if (err) {
             res.json(requtils.res(false, null, '', err))
             return;
         }
+        res.json(requtils.res(true, result, '', ''))
+    })
+}
+
+// Get Data By ID
+
+wrkspc.getWorkspaceByID = function(req, res) {
+    dbs.col(dbs.colnm.workspace).findOne({ "_id": parseInt(req.query.id) }, function(err, result) {
+        if (err) {
+            res.json(requtils.res(false, null, '', err))
+            return;
+        }
+
         res.json(requtils.res(true, result, '', ''))
     })
 }

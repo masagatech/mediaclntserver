@@ -6,8 +6,7 @@ function connect(url) {
     return MongoClient.connect(url, { useNewUrlParser: true }).then(client => client.db())
 }
 
-
-module.exports = async function () {
+module.exports = async function() {
     let databases = await Promise.all([connect(PROD_URI)])
     return {
         production: databases[0]
