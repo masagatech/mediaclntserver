@@ -5,7 +5,7 @@ module.exports = entt = {};
 
 // Insert / Update
 
-entt.saveEntity = function(req, res) {
+entt.saveEntityInfo = function(req, res) {
     const params = req.body;
 
     dbs.exists(dbs.colnm.entity, {
@@ -20,10 +20,8 @@ entt.saveEntity = function(req, res) {
         params._id = finalid;
 
         if (params.isedit == true) {
-            params.updatedby = "admin";
             params.updatedon = dbs.getCurrentDate();
         } else {
-            params.createdby = "admin";
             params.createdon = dbs.getCurrentDate();
         }
 
@@ -51,6 +49,44 @@ entt.saveEntity = function(req, res) {
     })
 }
 
-entt.getEntity = function(req, res) {
+// Get All Data
 
+entt.getEntityDetails = function(req, res) {
+    var params = {};
+
+    if (req.query.flag == "bywsid") {
+        params = { "wsid": parseInt(req.query.wsid) }
+    } else {
+        params = {}
+    }
+
+    dbs.col(dbs.colnm.entity).find(params, {
+        projection: {
+            _id: 1,
+            entt_name: 1,
+            contact_person: 1,
+            mobile: 1,
+            email: 1,
+            wsid: 1
+        }
+    }).toArray(function name(err, result) {
+        if (err) {
+            res.json(requtils.res(false, null, '', err))
+            return;
+        }
+        res.json(requtils.res(true, result, '', ''))
+    })
+}
+
+// Get Data By ID
+
+entt.getEntityByID = function(req, res) {
+    dbs.col(dbs.colnm.entity).findOne({ "_id": parseInt(req.query.id) }, function(err, result) {
+        if (err) {
+            res.json(requtils.res(false, null, '', err))
+            return;
+        }
+
+        res.json(requtils.res(true, result, '', ''))
+    })
 }

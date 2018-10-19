@@ -36,7 +36,7 @@ function isValidWorkspace(req, res) {
 
 // Insert / Update
 
-wrkspc.saveWorkspace = function(req, res) {
+wrkspc.saveWorkspaceInfo = function(req, res) {
     const isvalid = isValidWorkspace(req, res);
 
     if (isvalid) {
@@ -54,10 +54,8 @@ wrkspc.saveWorkspace = function(req, res) {
             params._id = finalid;
 
             if (params.isedit == true) {
-                params.updatedby = "admin";
                 params.updatedon = dbs.getCurrentDate();
             } else {
-                params.createdby = "admin";
                 params.createdon = dbs.getCurrentDate();
             }
 
@@ -106,7 +104,7 @@ wrkspc.existsWorkspace = function(req, res) {
 
 // Get All Data
 
-wrkspc.getAllWorkspace = function(req, res) {
+wrkspc.getWorkspaceDetails = function(req, res) {
     dbs.col(dbs.colnm.workspace).find({}, {
         projection: {
             _id: 1,
