@@ -12,6 +12,8 @@ module.exports = function(app) {
     app.get('/getMOM', common.getMOM);
     app.get('/getMOMByID', common.getMOMByID);
 
+    app.get('/getAutoData', common.getAutoData);
+
     // User Register / Login
 
     app.post('/login', login.getLogin);

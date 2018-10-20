@@ -1,4 +1,3 @@
-const MongoClient = require('mongodb').MongoClient;
 const dbs = require('../../db/dbutils');
 const requtils = require('../../utils/requtil');
 
@@ -52,12 +51,13 @@ usr.saveUserInfo = function(req, res) {
 
 // Get All Data
 
+// var MongoClient = require('mongodb').MongoClient;
+// var url = "mongodb://127.0.0.1:27017/";
+
 // MongoClient.connect(url, function(err, db) {
 //     if (err) throw err;
 
-//     var dbo = db.db("mydb");
-
-//     dbo.collection(dbs.colnm.user).aggregate([{
+//     dbs.col(dbs.colnm.user).aggregate([{
 //         $lookup: {
 //             from: dbs.colnm.mom,
 //             localField: 'gender',
@@ -67,7 +67,6 @@ usr.saveUserInfo = function(req, res) {
 //     }]).toArray(function(err, res) {
 //         if (err) throw err;
 //         console.log(JSON.stringify(res));
-//         db.close();
 //     });
 // });
 
