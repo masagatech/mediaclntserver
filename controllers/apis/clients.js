@@ -1,11 +1,9 @@
 const dbs = require('../../db/dbutils');
 const requtils = require('../../utils/requtil');
 
-
 module.exports = clients = {};
 
-
-clients.getClients = function (req, res) {
+clients.getClients = function(req, res) {
     const params = req.query || {};
 
     dbs.col(dbs.colnm.client).find(params, {
@@ -22,8 +20,7 @@ clients.getClients = function (req, res) {
     })
 }
 
-
-clients.getClientDetails = function (req, res) {
+clients.getClientDetails = function(req, res) {
     const params = req.query || {};
 
     dbs.col(dbs.colnm.client).findOne(params, {
@@ -34,7 +31,6 @@ clients.getClientDetails = function (req, res) {
             state: 1,
         }
     }, function name(err, result) {
-        console.log(err)
         if (err) {
             res.json(requtils.res(false, null, '', err))
             return;
@@ -43,7 +39,7 @@ clients.getClientDetails = function (req, res) {
     })
 }
 
-clients.registerClient = function (req, ress) {
+clients.registerClient = function(req, ress) {
     const params = req.body || {};
 
     const query = {
@@ -63,14 +59,13 @@ clients.registerClient = function (req, ress) {
     });
 }
 
-clients.updateClient = function (req, ress) {
+clients.updateClient = function(req, ress) {
     const params = req.body || {};
 
     if (!params.clientid) {
         ress.json(requtils.res(false, null, "91", "ClientId is required"));
         return;
     }
-
 
     const query = {
         "clientid": params.clientid

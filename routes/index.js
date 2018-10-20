@@ -1,9 +1,17 @@
+var common = require('../controllers/apis/common');
 var login = require('../controllers/apis/login');
 var wrkspc = require('../controllers/apis/wrkspc');
+var user = require('../controllers/apis/user');
 var entity = require('../controllers/apis/entity');
 var clients = require('../controllers/apis/clients');
 
 module.exports = function(app) {
+    // MOM
+
+    app.post('/saveMOM', common.saveMOM);
+    app.get('/getMOM', common.getMOM);
+    app.get('/getMOMByID', common.getMOMByID);
+
     // User Register / Login
 
     app.post('/login', login.getLogin);
@@ -15,6 +23,13 @@ module.exports = function(app) {
     app.get('/existsWorkspace', wrkspc.existsWorkspace);
     app.get('/getWorkspaceDetails', wrkspc.getWorkspaceDetails);
     app.get('/getWorkspaceByID', wrkspc.getWorkspaceByID);
+
+    // User
+
+    app.post('/saveUserInfo', user.saveUserInfo);
+    app.get('/getUserDetails', user.getUserDetails);
+    app.get('/getUserByID', user.getUserByID);
+    app.get('/getUserDropDown', user.getUserDropDown);
 
     // Entity
 
