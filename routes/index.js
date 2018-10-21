@@ -31,6 +31,7 @@ module.exports = function(app) {
     app.post('/saveUserInfo', user.saveUserInfo);
     app.get('/getUserDetails', user.getUserDetails);
     app.get('/getUserByID', user.getUserByID);
+    app.get('/getUserEntity', user.getUserEntity);
     app.get('/getUserDropDown', user.getUserDropDown);
 
     // Entity

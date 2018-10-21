@@ -51,25 +51,6 @@ usr.saveUserInfo = function(req, res) {
 
 // Get All Data
 
-// var MongoClient = require('mongodb').MongoClient;
-// var url = "mongodb://127.0.0.1:27017/";
-
-// MongoClient.connect(url, function(err, db) {
-//     if (err) throw err;
-
-//     dbs.col(dbs.colnm.user).aggregate([{
-//         $lookup: {
-//             from: dbs.colnm.mom,
-//             localField: 'gender',
-//             foreignField: 'key',
-//             as: 'userdetails'
-//         }
-//     }]).toArray(function(err, res) {
-//         if (err) throw err;
-//         console.log(JSON.stringify(res));
-//     });
-// });
-
 usr.getUserDetails = function(req, res) {
     var params = {};
 
@@ -100,12 +81,69 @@ usr.getUserDetails = function(req, res) {
 // Get Data By ID
 
 usr.getUserByID = function(req, res) {
-    dbs.col(dbs.colnm.user).findOne({ "_id": parseInt(req.query.id) }, function(err, result) {
+    dbs.col(dbs.colnm.user).aggregate([{
+            "$match": {
+                "_id": parseInt(req.query.id)
+            }
+        },
+        {
+            "$lookup": {
+                "from": dbs.colnm.entity,
+                "localField": "enttids",
+                "foreignField": "_id",
+                "as": "entity"
+            }
+        }, {
+            "$project": {
+                "_id": 1,
+                "ucode": 1,
+                "pwd": 1,
+                "full_name": 1,
+                "gender": 1,
+                "utype": 1,
+                "about_us": 1,
+                "mobile": 1,
+                "email": 1,
+                "address": 1,
+                "isallentt": 1,
+                "enttids": 1,
+                "isallentt": 1,
+                "wsid": 1,
+                "entity._id": 1,
+                "entity.entt_name": 1
+            }
+        }
+    ]).toArray(function name(err, result) {
         if (err) {
             res.json(requtils.res(false, null, '', err))
             return;
         }
+        res.json(requtils.res(true, result[0], '', ''))
+    });
 
+    // .findOne({ "_id": parseInt(req.query.id) }, function(err, result) {
+    //     if (err) {
+    //         res.json(requtils.res(false, null, '', err))
+    //         return;
+    //     }
+
+    //     res.json(requtils.res(true, result, '', ''))
+    // })
+}
+
+// Get User Entity
+
+usr.getUserEntity = function(req, res) {
+    dbs.col(dbs.colnm.entity).find({ "_id": { $in: req.query.enttids } }, {
+        projection: {
+            _id: 1,
+            entt_name: 1
+        }
+    }).toArray(function name(err, result) {
+        if (err) {
+            res.json(requtils.res(false, null, '', err))
+            return;
+        }
         res.json(requtils.res(true, result, '', ''))
     })
 }
