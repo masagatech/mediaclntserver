@@ -34,7 +34,7 @@ entt.saveEntityInfo = function(req, res) {
             returnOriginal: false
         }, function(err, result) {
             if (err) {
-                requtils.res(false, null, '-1', err);
+                res.json(requtils.res(false, null, '-1', err));
                 return;
             };
 

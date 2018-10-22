@@ -6,6 +6,8 @@ const async = require("async");
 
 module.exports = login = {};
 
+// Get Login
+
 login.getLogin = function(req, res) {
     const params = req.body;
 
@@ -52,6 +54,8 @@ login.getLogin = function(req, res) {
         res.error(err);
     })
 }
+
+// Registered User
 
 login.registeredUser = function(req, res) {
     const params = req.body;

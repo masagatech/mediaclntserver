@@ -3,6 +3,8 @@ const requtils = require('../../utils/requtil');
 
 module.exports = clients = {};
 
+// Get Client Data
+
 clients.getClients = function(req, res) {
     const params = req.query || {};
 
@@ -19,6 +21,8 @@ clients.getClients = function(req, res) {
         res.json(requtils.res(true, result, '', ''))
     })
 }
+
+// Save Client Data
 
 clients.getClientDetails = function(req, res) {
     const params = req.query || {};
@@ -39,6 +43,8 @@ clients.getClientDetails = function(req, res) {
     })
 }
 
+// Register Client Data
+
 clients.registerClient = function(req, ress) {
     const params = req.body || {};
 
@@ -58,6 +64,8 @@ clients.registerClient = function(req, ress) {
         ress.json(requtils.res(true, "Registered Successfully", '', ''))
     });
 }
+
+// Update Client Data
 
 clients.updateClient = function(req, ress) {
     const params = req.body || {};

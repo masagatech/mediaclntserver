@@ -3,50 +3,133 @@ const requtils = require('../../utils/requtil');
 
 module.exports = usr = {};
 
+// Exists User Code
+
+function isValidUserCode(params) {
+    dbs.exists(dbs.colnm.user, {
+        ucode: new RegExp("^" + params.ucode.toLowerCase(), "i")
+    }).then((id) => {
+        if (id > 0) {
+            console.log('Y');
+            return 'Y';
+        } else {
+            console.log('N');
+            return 'N';
+        }
+    })
+}
+
+// Exists Email
+
+function isValidEmail(params) {
+    dbs.exists(dbs.colnm.user, {
+        ucode: new RegExp("^" + params.email.toLowerCase(), "i")
+    }).then((id) => {
+        if (id > 0) {
+            console.log('Y');
+            return 'Y';
+        } else {
+            console.log('N');
+            return 'N';
+        }
+    })
+}
+
+// Validate
+
+function isValidUser(req, res) {
+    const params = req.body;
+
+    if (!params.ucode === '' || params.ucode.trim() === '') {
+        res.json(requtils.res(false, null, "-1", "User Code is Required"));
+        return false;
+    }
+    if (!params.pwd === '' || params.pwd.trim() === '') {
+        res.json(requtils.res(false, null, "-1", "Password is Required"));
+        return false;
+    }
+    if (!params.full_name === '' || params.full_name.trim() === '') {
+        res.json(requtils.res(false, null, "-1", "Full Name is Required"));
+        return false;
+    }
+    if (!params.gender === '' || params.gender.trim() === '') {
+        res.json(requtils.res(false, null, "-1", "Gender is Required"));
+        return false;
+    }
+    if (!params.utype === '' || params.utype.trim() === '') {
+        res.json(requtils.res(false, null, "-1", "User Type is Required"));
+        return false;
+    }
+    if (!params.mobile === '' || params.mobile.trim() === '') {
+        res.json(requtils.res(false, null, "-1", "Mobile is Required"));
+        return false;
+    }
+    if (!params.email === '' || params.email.trim() === '') {
+        res.json(requtils.res(false, null, "-1", "Email is Required"));
+        return false;
+    }
+
+    if (isValidUserCode(params) === 'Y') {
+        res.json(requtils.res(false, null, "-1", "User Code is Already Exists"));
+        return false;
+    }
+
+    if (isValidEmail(params) === 'Y') {
+        res.json(requtils.res(false, null, "-1", "Email is Already Exists"));
+        return false;
+    }
+
+    return true;
+}
+
 // Insert / Update
 
 usr.saveUserInfo = function(req, res) {
-    const params = req.body;
+    const isvalid = isValidUser(req, res);
 
-    dbs.exists(dbs.colnm.user, {
-        _id: params._id
-    }).then((id) => {
-        if (id > 0) {
-            return Promise.resolve(id);
-        } else {
-            return dbs.nextid(dbs.colnm.user)
-        }
-    }).then((finalid) => {
-        params._id = finalid;
+    if (isvalid) {
+        const params = req.body;
 
-        if (params.isedit == true) {
-            params.updatedon = dbs.getCurrentDate();
-        } else {
-            params.createdon = dbs.getCurrentDate();
-        }
-
-        dbs.col(dbs.colnm.user).findOneAndUpdate({
-            _id: finalid
-        }, {
-            $set: params
-        }, {
-            upsert: true,
-            returnOriginal: false
-        }, function(err, result) {
-            if (err) {
-                requtils.res(false, null, '-1', err);
-                return;
-            };
+        dbs.exists(dbs.colnm.user, {
+            _id: params._id
+        }).then((id) => {
+            if (id > 0) {
+                return Promise.resolve(id);
+            } else {
+                return dbs.nextid(dbs.colnm.user)
+            }
+        }).then((finalid) => {
+            params._id = finalid;
 
             if (params.isedit == true) {
-                res.json(requtils.res(true, result, '2', 'Data updated successfully'));
+                params.updatedon = dbs.getCurrentDate();
             } else {
-                res.json(requtils.res(true, result, '1', 'Data saved successfully'));
+                params.createdon = dbs.getCurrentDate();
             }
-        });
-    }).catch((err) => {
-        res.json(requtils.res(false, null, '-1', err));
-    })
+
+            dbs.col(dbs.colnm.user).findOneAndUpdate({
+                _id: finalid
+            }, {
+                $set: params
+            }, {
+                upsert: true,
+                returnOriginal: false
+            }, function(err, result) {
+                if (err) {
+                    res.json(requtils.res(false, null, '-1', err.errmsg));
+                    return;
+                };
+
+                if (params.isedit == true) {
+                    res.json(requtils.res(true, result, '2', 'Data updated successfully'));
+                } else {
+                    res.json(requtils.res(true, result, '1', 'Data saved successfully'));
+                }
+            });
+        }).catch((err) => {
+            res.json(requtils.res(false, null, '-1', err));
+        })
+    }
 }
 
 // Get All Data
