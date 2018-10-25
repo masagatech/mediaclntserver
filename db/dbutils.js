@@ -52,7 +52,6 @@ dbutils.exists = function(collection, query) {
                 reject(err)
             };
 
-            console.log(result)
             resolve((result !== null ? result._id : 0));
         });
     });

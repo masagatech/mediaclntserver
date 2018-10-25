@@ -2,7 +2,7 @@ const mqtt = require('mqtt');
 const dbs = require('../db/dbutils');
 
 
-module.exports = function () {
+module.exports = function() {
     var options = {
         port: 1883,
         host: 'mqtt://traveltrack.goyo.in',
@@ -18,14 +18,14 @@ module.exports = function () {
 
     var client = mqtt.connect('mqtt://traveltrack.goyo.in', options)
 
-    client.on('connect', function () { // When connected
-        //   console.log('connected');
+    client.on('connect', function() { // When connected
         // subscribe to a topic
-        client.subscribe('client/connected', function () {
+
+        client.subscribe('client/connected', function() {
             // when a message arrives, do something with it
-            client.on('message', function (topic, message, packet) {
+
+            client.on('message', function(topic, message, packet) {
                 var apis = JSON.parse(message);
-                //                console.log(apis)
                 if (!apis.clientid) {
                     return;
                 }
@@ -40,21 +40,20 @@ module.exports = function () {
                     clientid: apis.clientid
                 }, newvalues, {
                     upsert: true
-                }, function (err, res) {
+                }, function(err, res) {
                     console.log(err)
-
                 });
-                //console.log("Received '" + message + "' on '" + topic + "'");
             });
         });
 
-
         // maintain online offline status
-        client.subscribe('client/+/status', function () {
-            // when a message arrives, do something with it
-            client.on('message', function (topic, message, packet) {
 
+        client.subscribe('client/+/status', function() {
+            // when a message arrives, do something with it
+
+            client.on('message', function(topic, message, packet) {
                 var apis = JSON.parse(message);
+
                 if (!apis.clientid) {
                     return;
                 }
@@ -63,6 +62,7 @@ module.exports = function () {
                 } else {
                     return;
                 }
+
                 var newvalues = {
                     $set: {
                         "clientid": apis.clientid,
@@ -76,7 +76,7 @@ module.exports = function () {
                     clientid: apis.clientid
                 }, newvalues, {
                     upsert: true
-                }, function (err, res) {
+                }, function(err, res) {
                     console.log(err)
                 });
 

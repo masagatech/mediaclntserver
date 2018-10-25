@@ -3,36 +3,45 @@ const requtils = require('../../utils/requtil');
 
 module.exports = usr = {};
 
+var ucodevalid = '';
+var emailvalid = '';
+
 // Exists User Code
 
 function isValidUserCode(params) {
+    var _ucodevalid = '';
+
     dbs.exists(dbs.colnm.user, {
         ucode: new RegExp("^" + params.ucode.toLowerCase(), "i")
     }).then((id) => {
         if (id > 0) {
-            console.log('Y');
-            return 'Y';
+            _ucodevalid = 'Y';
         } else {
-            console.log('N');
-            return 'N';
+            _ucodevalid = 'N';
         }
     })
+
+    ucodevalid = _ucodevalid;
+    return ucodevalid;
 }
 
 // Exists Email
 
 function isValidEmail(params) {
+    var _emailvalid = '';
+
     dbs.exists(dbs.colnm.user, {
-        ucode: new RegExp("^" + params.email.toLowerCase(), "i")
+        email: new RegExp("^" + params.email.toLowerCase(), "i")
     }).then((id) => {
         if (id > 0) {
-            console.log('Y');
-            return 'Y';
+            _emailvalid = 'Y';
         } else {
-            console.log('N');
-            return 'N';
+            _emailvalid = 'N';
         }
     })
+
+    emailvalid = _emailvalid;
+    return emailvalid;
 }
 
 // Validate
@@ -69,10 +78,14 @@ function isValidUser(req, res) {
         return false;
     }
 
+    console.log(isValidUserCode(params));
+
     if (isValidUserCode(params) === 'Y') {
         res.json(requtils.res(false, null, "-1", "User Code is Already Exists"));
         return false;
     }
+
+    console.log(isValidEmail(params));
 
     if (isValidEmail(params) === 'Y') {
         res.json(requtils.res(false, null, "-1", "Email is Already Exists"));
@@ -88,6 +101,8 @@ usr.saveUserInfo = function(req, res) {
     const isvalid = isValidUser(req, res);
 
     if (isvalid) {
+        console.log("success");
+
         const params = req.body;
 
         dbs.exists(dbs.colnm.user, {

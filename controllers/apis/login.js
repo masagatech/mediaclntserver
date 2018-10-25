@@ -11,8 +11,8 @@ module.exports = login = {};
 login.getLogin = function(req, res) {
     const params = req.body;
 
-    if (!params.code || params.code.trim() === '') {
-        res.json(requtils.res(false, null, "91", "Code is required"));
+    if (!params.ucode || params.ucode.trim() === '') {
+        res.json(requtils.res(false, null, "91", "Username is required"));
         return;
     } else if (!params.pwd || params.pwd.trim() === '') {
         res.json(requtils.res(false, null, "92", "Password is required"));
@@ -20,10 +20,10 @@ login.getLogin = function(req, res) {
     }
 
     dbs.getOneProj(dbs.colnm.user, {
-        'code': params.code
+        'ucode': params.ucode
     }, {
         projection: {
-            code: 1,
+            ucode: 1,
             pwd: 1,
             full_name: 1,
             email: 1,
@@ -39,7 +39,7 @@ login.getLogin = function(req, res) {
             return;
         }
 
-        if (params.pwd.trim() !== docs.pwd) {
+        if (params.pwd.trim() !== docs.pwd.trim()) {
             res.json(requtils.res(false, null, "94", "Invalid Login"));
             return;
         }
