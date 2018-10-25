@@ -158,16 +158,50 @@ usr.getUserDetails = function(req, res) {
         params = {}
     }
 
-    dbs.col(dbs.colnm.user).find(params, {
-        projection: {
-            _id: 1,
-            full_name: 1,
-            utype: 1,
-            mobile: 1,
-            email: 1,
-            wsid: 1
+    // dbs.col(dbs.colnm.user).find(params, {
+    //     projection: {
+    //         _id: 1,
+    //         full_name: 1,
+    //         utype: 1,
+    //         mobile: 1,
+    //         email: 1,
+    //         wsid: 1
+    //     }
+    // })
+
+    dbs.col(dbs.colnm.user).aggregate([{
+            "$match": params
+        },
+        {
+            "$lookup": {
+                "from": dbs.colnm.mom,
+                "localField": "utype",
+                "foreignField": "key",
+                "as": "utype"
+            }
+        },
+        {
+            "$lookup": {
+                "from": dbs.colnm.mom,
+                "localField": "gender",
+                "foreignField": "key",
+                "as": "gender"
+            }
+        }, {
+            "$project": {
+                "_id": 1,
+                "ucode": 1,
+                "full_name": 1,
+                "mobile": 1,
+                "email": 1,
+                "wsid": 1,
+                "utype.key": 1,
+                "utype.val": 1,
+                "gender.key": 1,
+                "gender.val": 1
+            }
         }
-    }).toArray(function name(err, result) {
+    ]).toArray(function name(err, result) {
         if (err) {
             res.json(requtils.res(false, null, '', err))
             return;
