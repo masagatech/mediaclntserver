@@ -4,6 +4,7 @@ var wrkspc = require('../controllers/apis/wrkspc');
 var user = require('../controllers/apis/user');
 var entity = require('../controllers/apis/entity');
 var clients = require('../controllers/apis/clients');
+var zone = require('../controllers/apis/zone');
 
 module.exports = function(app) {
     // MOM
@@ -39,6 +40,12 @@ module.exports = function(app) {
     app.post('/saveEntityInfo', entity.saveEntityInfo);
     app.get('/getEntityDetails', entity.getEntityDetails);
     app.get('/getEntityByID', entity.getEntityByID);
+
+    // Zone
+
+    app.post('/saveZoneInfo', zone.saveZoneInfo);
+    app.get('/getZoneDetails', zone.getZoneDetails);
+    app.get('/getZoneByID', zone.getZoneByID);
 
     // Client
 
